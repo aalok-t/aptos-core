@@ -22,6 +22,9 @@ const ENV_FLAGS: &str = "MVP_TEST_FLAGS";
 const ENV_TEST_EXTENDED: &str = "MVP_TEST_X";
 const ENV_TEST_FEATURE: &str = "MVP_TEST_FEATURE";
 const ENV_TEST_ON_CI: &str = "MVP_TEST_ON_CI";
+const ENV_TEST_INCONSISTENCY: &str = "MVP_TEST_INCONSISTENCY";
+const ENV_TEST_UNCONDITIONAL_ABORT_AS_INCONSISTENCY: &str =
+    "MVP_TEST_UNCONDITIONAL_ABORT_AS_INCONSISTENCY";
 
 static NOT_CONFIGURED_WARNED: AtomicBool = AtomicBool::new(false);
 
@@ -144,6 +147,17 @@ fn test_runner_for_feature(path: &Path, feature: &Feature) -> datatest_stable::R
         for instructions."
             );
         }
+    }
+
+    let inconsistency_flag = read_env_var(ENV_TEST_INCONSISTENCY) == "1";
+    let unconditional_abort_inconsistency_flag =
+        read_env_var(ENV_TEST_UNCONDITIONAL_ABORT_AS_INCONSISTENCY) == "1";
+
+    if inconsistency_flag {
+        options.prover.check_inconsistency = true;
+    }
+    if unconditional_abort_inconsistency_flag {
+        options.prover.unconditional_abort_as_inconsistency = true;
     }
     options.backend.check_tool_versions()?;
     options.prover.stable_test_output = true;
